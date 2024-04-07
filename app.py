@@ -18,10 +18,11 @@ query = "SELECT * FROM ativos;"
 
 df = pd.read_sql(query, conn)
 
-# Filtrando apenas ações Americanas
-siglas = df['name'].str.split('.').str[0].tolist()
+pd.set_option('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', None)
+
+ativo = df['name'].tolist()
 
 # Selecionando o periodo
-data = yf.download(siglas[0], start="2023-01-01", end="2024-01-01", interval="1wk")
+data = yf.download(ativo, start="2023-01-01", end="2024-01-01", interval="1wk")
 
 data
