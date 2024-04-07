@@ -25,9 +25,9 @@
 
 O projeto ainda está em desenvolvimento e será criado em duas partes, as próximas atualizações deste serão voltadas nas seguintes tarefas:
 
-- [ ] Conexão com Yahoo Finance `<YFinance>`
-- [ ] Conexão com meu banco de dados contendo uma lista de ativos da minha corretora `<Activtrades / PostgreSQL>`
-- [ ] Efetuar um Join entre dados do yahoo e minha lista do banco de dados
+- [x] Conexão com Yahoo Finance `<YFinance>`
+- [x] Conexão com meu banco de dados contendo uma lista de ativos da minha corretora `<Activtrades / PostgreSQL>`
+- [x] Efetuar um Join entre dados do yahoo e minha lista do banco de dados
 - [ ] Filtrar Nomes de Ativos, Preços e datas com as premissas de investimento
 - [ ] Finalizar o processo de ETL com apenas os ativos que cumprem as premissas 
 - [ ] Exportar esses dados para um arquivo Excel
