@@ -4,13 +4,13 @@ from sqlalchemy import create_engine
 import pandas as pd
 
 # banco de dados
-dbname = 'annderoli'
+dbname = 'scrap_db'
 user = 'postgres'
 password = '123'
 host = 'localhost'
 port = '5432'
 
-engine = create_engine(f'postgresql://{user}:{password}@{host}:{port}/{dbname}')
+engine = create_engine(f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}')
 
 conn = engine.connect()
 
@@ -23,6 +23,6 @@ pd.set_option('display.max_rows', None, 'display.max_columns', None, 'display.ma
 ativo = df['name'].tolist()
 
 # Selecionando o periodo
-data = yf.download(ativo, start="2023-01-01", end="2024-01-01", interval="1wk")
+data = yf.download(ativo, start="2023-01-01", end="2024-01-01", interval="3mo")
 
 data
