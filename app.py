@@ -23,6 +23,6 @@ pd.set_option('display.max_rows', None, 'display.max_columns', None, 'display.ma
 ativo = df['name'].tolist()
 
 # Selecionando o periodo
-data = yf.download(ativo, start="2023-01-01", end="2024-01-01", interval="3mo")
+data = yf.download(ativo, start="2024-01-01", end="2024-03-30", interval="1wk")
 
 data
