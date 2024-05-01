@@ -27,7 +27,7 @@ pd.set_option('display.max_rows', None, 'display.max_columns', None, 'display.ma
 ativo = df['name'].tolist()
 
 # Selecionando o periodo
-data = yf.download('AAPL', start="2024-01-01", end="2024-03-30", interval="1wk")
+data = yf.download(ativo[5], start="2024-01-01", end="2024-03-30", interval="1wk")
 
 yf.pdr_override()
 
