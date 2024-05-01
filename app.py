@@ -94,4 +94,4 @@ position[0][0] = regra[0][0]
 df['regra'] = regra
 df['position'] = position
 
-df[['Close', 'inf', 'sup', 'position']]
+df[['Date', 'Close', 'position']]
