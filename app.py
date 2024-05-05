@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pandas_datareader import data as pdr
 
+# Configurações
+yf.pdr_override()
+
 # banco de dados
 dbname = 'scrap_db'
 user = 'postgres'
@@ -20,78 +23,52 @@ conn = engine.connect()
 
 query = "SELECT * FROM ativos;"
 
-df = pd.read_sql(query, conn)
+df_db = pd.read_sql(query, conn)
 
 pd.set_option('display.max_rows', None, 'display.max_columns', None, 'display.max_colwidth', None)
 
-ativo = df['name'].tolist()
+# Acessando os Ativos do DB
+ativos = df_db['name'].tolist()
 
-# Selecionando o periodo
-data = yf.download(ativo[5], start="2024-01-01", end=None, interval="1wk")
+data = yf.download(ativos, start="2024-01-01", end=None, interval="1wk")
+data = data['Close'].dropna(axis=1)
+data = data.reset_index()
 
-yf.pdr_override()
+# Regra
+dfs = []
 
-df = pd.DataFrame(data)
-df = df.reset_index()
+for ativo in data.columns:
 
-# Regressão
-p = -100
-X = df.index[p:].values.reshape(-1, 1)
-y = df['Close'][p:].values.reshape(-1, 1)
+    X = np.arange(len(data)).reshape(-1, 1)
+    y = data[ativo].values.astype(float).reshape(-1, 1)
+    reg = LinearRegression().fit(X, y)
+    y_pred = reg.predict(X)
 
-reg = LinearRegression().fit(X, y)
+    # Premissa
+    desvio_pad = np.std(y_pred)
+    sup = y_pred + desvio_pad * 15
+    inf = y_pred - desvio_pad * 15
 
-y_pred = reg.predict(X)
+    # Posição
+    regra = np.where(y < inf, 'compra', np.where(y > sup, 'venda', ''))
 
-desvio_pad = np.std(y_pred)
-sup = y_pred + desvio_pad*0.4
-inf = y_pred - desvio_pad*0.4
-sup2 = y_pred + desvio_pad*0.8
-inf2 = y_pred - desvio_pad*0.8
+    position = np.where((regra != np.roll(regra, 1)) & (regra == 'compra'), 'compra',
+                np.where((regra != np.roll(regra, 1)) & (regra == 'venda'), 'venda', ''))
 
+    position[0] = regra[0]
 
-def ma(values, n=200):
-     
-    return values.rolling(n).mean().dropna()
+    df_ativo = pd.DataFrame({
+        'Ativo': ativo,
+        'Date': data['Date'],
+        'Close': data[ativo],
+        'Predicted_Close': y_pred.flatten(),
+        'Position': position.flatten()
+    })
 
-# Grafico
-plt.style.use('dark_background')
+    dfs.append(df_ativo)
 
-fig, ax = plt.subplots()
+df = pd.concat(dfs, ignore_index=True)
+filtro = df.groupby('Ativo').tail(1)
+lista = filtro[filtro['Position'] == 'compra']
 
-ax.scatter(df.index[-150:], df['Close'][-150:], color='w')
-
-ax.plot(ma(df['Close']), '-w')
-ax.plot(X, y_pred, '--w')
-ax.plot(X, sup, '--r')
-ax.plot(X, inf, '--g')
-ax.plot(X, sup2, '--r')
-ax.plot(X, inf2, '--g')
-
-# regra
-df = df[p:]
-
-df['y_pred'] = y_pred
-df['inf'] = inf
-df['inf2'] = inf2
-df['sup'] = sup
-df['sup2'] = sup2
-
-# trade
-pd.set_option('display.max_rows', None)
-
-regra = np.where( y < inf, 'compra', 
-        np.where( y > sup, 'venda',''))
-
-position = np.where((regra != np.roll(regra, 1)) & 
-                    (regra == 'compra'),'compra',
-            np.where(
-                (regra != np.roll(regra, 1)) & 
-                (regra == 'venda'),'venda', ''))
-
-position[0][0] = regra[0][0]
-
-df['regra'] = regra
-df['position'] = position
-
-df[['Date', 'Close', 'position']]
+lista
